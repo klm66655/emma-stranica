@@ -111,9 +111,7 @@
     background:#fff;color:var(--deep);box-shadow:0 6px 16px rgba(0,0,0,.12);
   }
   .arrow:hover{transform:scale(1.1)}
-  .dots{display:flex;gap:8px;min-width:40px;justify-content:center}
-  .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.7);transition:.3s}
-  .dot.on{background:var(--deep);transform:scale(1.3)}
+    .dots{min-width:80px;text-align:center;font-weight:600;font-size:1.1rem;color:var(--deep);text-shadow:0 1px 0 #fff}
   #next{
     background:linear-gradient(135deg,#ff5c8a,#e0245e);color:#fff;
     box-shadow:0 8px 24px rgba(224,36,94,.45);font-size:1.3rem;margin-top:.3rem;
@@ -283,12 +281,7 @@ gImg.onerror = () => { gImg.onerror = null; gImg.src = PLACEHOLDER; };
 
 let cur = 0, timer = null, ready = false, busy = false;
 
-PHOTOS.forEach((_, i) => {
-  const d = document.createElement('span');
-  d.className = 'dot';
-  dotsBox.appendChild(d);
-  new Image().src = PHOTOS[i].src; // učitaj unaprijed
-});
+PHOTOS.forEach(p => { new Image().src = p.src; }); // učitaj unaprijed
 
 function show(i, dir = 1){
   if (!PHOTOS.length || busy) return;
@@ -301,7 +294,7 @@ function show(i, dir = 1){
     gImg.src = PHOTOS[cur].src;
     gCap.textContent = PHOTOS[cur].caption || '';
     polaroid.style.setProperty('--tilt', ((Math.random()*4 - 2).toFixed(1)) + 'deg');
-    [...dotsBox.children].forEach((d, k) => d.classList.toggle('on', k === cur));
+        dotsBox.textContent = (cur + 1) + ' / ' + PHOTOS.length;
     polaroid.classList.remove('swap');
     busy = false;
   }, 300);
