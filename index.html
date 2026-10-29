@@ -22,20 +22,17 @@
     position:fixed;inset:0;z-index:0;
     opacity:.7;
   }
-  /* zamućena pozadina koja popunjava prazan prostor sa strane */
   #photo::before{
     content:"";position:absolute;inset:-20px;
     background:var(--bg-img, none) center 25%/cover no-repeat;
     filter:blur(10px);
   }
-  /* cijela slika u pravoj mjeri + roza providni sloj */
   #photo::after{
     content:"";position:absolute;inset:0;
     background:
       radial-gradient(circle at 50% 50%,rgba(255,240,245,.3),rgba(255,120,160,.2)),
       var(--bg-img, none) center/contain no-repeat;
   }
-  /* na širokim ekranima oštra slika se glatko stapa sa stranama */
   @media (min-aspect-ratio:1/1){
     #photo::after{
       -webkit-mask-image:linear-gradient(to right,transparent,#000 25%,#000 75%,transparent);
@@ -78,6 +75,51 @@
   #no{background:#fff;color:var(--deep);box-shadow:0 6px 18px rgba(0,0,0,.12)}
   #no.run{position:fixed;z-index:5;transition:left .25s cubic-bezier(.3,1.6,.5,1),top .25s cubic-bezier(.3,1.6,.5,1)}
 
+  /* ===== GALERIJA NAŠIH SLIKA ===== */
+  #gallery{
+    position:fixed;inset:0;z-index:4;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:.9rem;padding:1rem;text-align:center;
+    background:linear-gradient(160deg,rgba(255,217,230,.9),rgba(255,143,176,.82));
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    transition:opacity .6s;
+  }
+  #gallery.hide{opacity:0;pointer-events:none}
+  .g-title{
+    font-family:'Pacifico',cursive;font-weight:400;
+    font-size:clamp(1.8rem,6vw,3rem);color:var(--deep);text-shadow:0 3px 0 #fff;
+  }
+  .stage{width:100%;display:flex;justify-content:center;touch-action:pan-y;user-select:none}
+  .polaroid{
+    background:#fff;padding:12px 12px 6px;border-radius:8px;
+    box-shadow:0 14px 36px rgba(214,36,110,.35);
+    transition:transform .45s cubic-bezier(.2,1.2,.4,1),opacity .35s;
+    transform:rotate(var(--tilt,-2deg));
+  }
+  .polaroid.swap{opacity:0;transform:translateX(var(--dir,40px)) rotate(var(--tilt,-2deg)) scale(.92)}
+  .polaroid img{
+    display:block;width:min(78vw,360px);height:min(46vh,400px);
+    object-fit:cover;object-position:center 25%;border-radius:4px;background:#ffe3ec;
+  }
+  .caption{
+    font-family:'Pacifico',cursive;color:var(--deep);
+    font-size:clamp(1rem,3.5vw,1.3rem);padding:12px 4px 10px;min-height:3rem;
+  }
+  .g-nav{display:flex;align-items:center;gap:1rem}
+  .arrow{
+    padding:0;width:46px;height:46px;font-size:1.7rem;line-height:1;
+    background:#fff;color:var(--deep);box-shadow:0 6px 16px rgba(0,0,0,.12);
+  }
+  .arrow:hover{transform:scale(1.1)}
+  .dots{display:flex;gap:8px;min-width:40px;justify-content:center}
+  .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.7);transition:.3s}
+  .dot.on{background:var(--deep);transform:scale(1.3)}
+  #next{
+    background:linear-gradient(135deg,#ff5c8a,#e0245e);color:#fff;
+    box-shadow:0 8px 24px rgba(224,36,94,.45);font-size:1.3rem;margin-top:.3rem;
+  }
+  #next:hover{transform:scale(1.07)}
+
   /* poruka nakon "Da" */
   #win{
     position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;
@@ -97,7 +139,6 @@
   .confetti{position:fixed;top:-30px;z-index:11;pointer-events:none;animation:fall linear forwards}
   @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 
-  /* dugme za izbor slike (za pregled) */
   #pick{position:fixed;right:10px;bottom:10px;z-index:3;font-size:.8rem;padding:.4rem .8rem;background:rgba(255,255,255,.6);color:var(--deep);box-shadow:none}
 
   /* uvodni ekran sa kovertom */
@@ -135,6 +176,22 @@
   </div>
 </main>
 
+<div id="gallery">
+  <div class="g-title">Naši trenuci 💕</div>
+  <div class="stage">
+    <div class="polaroid" id="polaroid">
+      <img id="g-img" alt="">
+      <div class="caption" id="g-cap"></div>
+    </div>
+  </div>
+  <div class="g-nav">
+    <button class="arrow" id="prev" aria-label="Prethodna">‹</button>
+    <div class="dots" id="dots"></div>
+    <button class="arrow" id="nxt" aria-label="Sljedeća">›</button>
+  </div>
+  <button id="next">Idi dalje 💖</button>
+</div>
+
 <div id="win" aria-live="polite">
   <img class="big" id="face" alt="">
   <h2>Znao sam! ❤️</h2>
@@ -151,6 +208,29 @@ const BACKGROUND_IMAGE = "emma.jpeg";
 const HIDE_PICK_BUTTON = true;
 const FACE_IMAGE = "kelicaflow.jpeg";
 
+/* ===== NAŠE SLIKE =====
+   Dodaj svoje slike u isti folder i upiši ih ovdje (src = ime fajla, caption = tekst ispod slike).
+   Slika može biti koliko god hoćeš. Ostavi [] ako ne želiš galeriju. */
+const PHOTOS = [
+  { src: "emma.jpeg",   caption: "Moja najljepša 💕" },
+  { src: "emma1.jpeg",  caption: "Zbog tebe se smijem ✨" },
+  { src: "emma2.jpeg",  caption: "Naš dan 🌹" },
+  { src: "emma3.jpeg",  caption: "Samo ti i ja 💖" },
+  { src: "emma4.jpeg",  caption: "Moje srce 💗" },
+  { src: "emma5.jpeg",  caption: "OKANOOOO 🥰" },
+  { src: "emma6.jpeg",  caption: "Tvoj osmijeh ❤️" },
+  { src: "emma7.jpeg",  caption: "Moja sreća 🌸" },
+  { src: "emma8.jpeg",  caption: "JEDNA ZAJEBANA💘" },
+  { src: "emma9.jpeg",  caption: "Ti si sve 💞" },
+  { src: "emma10.jpeg", caption: "Najlepsiiiiiiii 📸" },
+  { src: "emma11.jpeg", caption: "Jedna sa jezera 💝" },
+  { src: "emma12.jpeg", caption: "Svaki dan s tobom ✨" },
+  { src: "emma14.jpeg", caption: "Volim te 💕" },
+  { src: "emma15.jpeg", caption: "Moja princeza 👑" },
+  { src: "emma16.jpeg", caption: "Spavalica 💖" },
+  { src: "emma17.jpeg", caption: "Ti i ja 🌹" },
+];
+
 const face = document.getElementById('face');
 face.src = FACE_IMAGE || BACKGROUND_IMAGE;
 
@@ -161,10 +241,6 @@ function startSong(){
   // song.currentTime = 30; // odkomentariši da krene od 30. sekunde
   song.play().catch(() => {});
 }
-document.getElementById('open').addEventListener('click', () => {
-  startSong();
-  document.getElementById('intro').classList.add('hide');
-});
 
 /* pozadinska slika */
 const photo = document.getElementById('photo');
@@ -194,12 +270,92 @@ function addHeart(){
 for (let i=0;i<14;i++) setTimeout(addHeart, i*250);
 setInterval(addHeart, 500);
 
-/* dugme Ne */
+/* ===== GALERIJA ===== */
+const gallery = document.getElementById('gallery');
+const polaroid = document.getElementById('polaroid');
+const gImg = document.getElementById('g-img');
+const gCap = document.getElementById('g-cap');
+const dotsBox = document.getElementById('dots');
+const PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#ffd1dc"/><text x="200" y="240" font-size="150" text-anchor="middle">❤️</text></svg>'
+);
+gImg.onerror = () => { gImg.onerror = null; gImg.src = PLACEHOLDER; };
+
+let cur = 0, timer = null, ready = false, busy = false;
+
+PHOTOS.forEach((_, i) => {
+  const d = document.createElement('span');
+  d.className = 'dot';
+  dotsBox.appendChild(d);
+  new Image().src = PHOTOS[i].src; // učitaj unaprijed
+});
+
+function show(i, dir = 1){
+  if (!PHOTOS.length || busy) return;
+  busy = true;
+  cur = (i + PHOTOS.length) % PHOTOS.length;
+  polaroid.style.setProperty('--dir', (dir * 40) + 'px');
+  polaroid.classList.add('swap');
+  setTimeout(() => {
+    gImg.onerror = () => { gImg.onerror = null; gImg.src = PLACEHOLDER; };
+    gImg.src = PHOTOS[cur].src;
+    gCap.textContent = PHOTOS[cur].caption || '';
+    polaroid.style.setProperty('--tilt', ((Math.random()*4 - 2).toFixed(1)) + 'deg');
+    [...dotsBox.children].forEach((d, k) => d.classList.toggle('on', k === cur));
+    polaroid.classList.remove('swap');
+    busy = false;
+  }, 300);
+}
+function restartTimer(){
+  clearInterval(timer);
+  if (PHOTOS.length > 1) timer = setInterval(() => show(cur + 1, 1), 4500);
+}
+document.getElementById('nxt').onclick  = () => { show(cur + 1, 1);  restartTimer(); };
+document.getElementById('prev').onclick = () => { show(cur - 1, -1); restartTimer(); };
+
+/* swipe na telefonu */
+let sx = null;
+gallery.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+gallery.addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx; sx = null;
+  if (Math.abs(dx) > 50){ show(cur + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1); restartTimer(); }
+});
+
+if (PHOTOS.length <= 1){
+  document.getElementById('prev').style.display = 'none';
+  document.getElementById('nxt').style.display = 'none';
+}
+
+/* prelaz: galerija -> pitanje */
+function finishGallery(){
+  ready = true;
+  clearInterval(timer);
+  gallery.classList.add('hide');
+  setTimeout(() => { gallery.style.display = 'none'; }, 650);
+  const card = document.querySelector('.card');
+  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+}
+document.getElementById('next').onclick = finishGallery;
+
+/* prelaz: koverta -> galerija */
+document.getElementById('open').addEventListener('click', () => {
+  startSong();
+  document.getElementById('intro').classList.add('hide');
+  if (PHOTOS.length){
+    show(0, 1);
+    restartTimer();
+  } else {
+    finishGallery();
+  }
+});
+
+/* ===== dugme Ne ===== */
 const no = document.getElementById('no');
 let mouse = {x:-999,y:-999};
 function runAway(){
+  if (!ready) return;
   if (!no.classList.contains('run')){
-    // dugme prebacujemo u <body> jer 'blur' kartica zarobljava fixed pozicioniranje
     const ph = document.createElement('span');
     ph.style.width = no.offsetWidth + 'px';
     no.parentNode.insertBefore(ph, no);
@@ -222,9 +378,9 @@ function runAway(){
   no.style.left = x + 'px';
   no.style.top = y + 'px';
 }
-/* bježi čim se miš samo približi */
 document.addEventListener('mousemove', e => {
   mouse.x = e.clientX; mouse.y = e.clientY;
+  if (!ready) return;
   const r = no.getBoundingClientRect();
   const cx = r.left + r.width/2, cy = r.top + r.height/2;
   if (Math.hypot(e.clientX - cx, e.clientY - cy) < Math.max(r.width, r.height) + 50) runAway();
@@ -236,7 +392,7 @@ no.addEventListener('focus', () => { runAway(); no.blur(); });
 no.addEventListener('click', e => { e.preventDefault(); runAway(); });
 window.addEventListener('resize', () => { if (no.classList.contains('run')) runAway(); });
 
-/* dugme Da */
+/* ===== dugme Da ===== */
 document.getElementById('yes').addEventListener('click', () => {
   document.getElementById('win').classList.add('show');
   no.style.display = 'none';
