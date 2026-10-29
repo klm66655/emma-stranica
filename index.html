@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emma ❤️</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rose:#ff4d79; --deep:#d6246e; --blush:#ffe3ec; --cream:#fff6f8; --ink:#5a1230;
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;color:var(--ink);
+    background:linear-gradient(160deg,#ffd9e6,#ffb3c9 55%,#ff8fb0);
+    display:flex;align-items:center;justify-content:center;
+  }
+  /* ===== POZADINSKA SLIKA =====
+     Stavi svoju sliku u isti folder i upiši njeno ime ovdje, npr: url("emma.jpg") */
+  #photo{
+    position:fixed;inset:0;z-index:0;
+    opacity:.7;
+  }
+  /* zamućena pozadina koja popunjava prazan prostor sa strane */
+  #photo::before{
+    content:"";position:absolute;inset:-20px;
+    background:var(--bg-img, none) center 25%/cover no-repeat;
+    filter:blur(10px);
+  }
+  /* cijela slika u pravoj mjeri + roza providni sloj */
+  #photo::after{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 50% 50%,rgba(255,240,245,.3),rgba(255,120,160,.2)),
+      var(--bg-img, none) center/contain no-repeat;
+  }
+  /* na širokim ekranima oštra slika se glatko stapa sa stranama */
+  @media (min-aspect-ratio:1/1){
+    #photo::after{
+      -webkit-mask-image:linear-gradient(to right,transparent,#000 25%,#000 75%,transparent);
+              mask-image:linear-gradient(to right,transparent,#000 25%,#000 75%,transparent);
+    }
+  }
+  #hearts{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+  .bg-heart{position:absolute;bottom:-60px;animation:rise linear infinite;opacity:.7}
+  @keyframes rise{to{transform:translateY(-115vh) rotate(25deg);opacity:0}}
+
+  main{position:relative;z-index:2;text-align:center;padding:2rem 1.25rem;max-width:760px}
+  .card{
+    background:rgba(255,246,248,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:2px solid rgba(255,255,255,.8);border-radius:36px;
+    padding:clamp(1.75rem,5vw,3.5rem) clamp(1.25rem,5vw,3.5rem);
+    box-shadow:0 20px 60px rgba(214,36,110,.25);
+    animation:pop .8s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  @keyframes pop{from{transform:scale(.6);opacity:0}}
+  h1{
+    font-family:'Pacifico',cursive;font-weight:400;
+    font-size:clamp(2rem,7vw,4rem);line-height:1.25;color:var(--deep);
+    text-shadow:0 3px 0 #fff;
+  }
+  .beat{display:inline-block;animation:beat 1.2s infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.2)}}
+  .btns{margin-top:2.25rem;display:flex;gap:1.25rem;justify-content:center;align-items:center;min-height:64px}
+  button{
+    font:600 1.3rem 'Fredoka',sans-serif;border:0;cursor:pointer;border-radius:999px;
+    padding:.85rem 2.4rem;transition:transform .2s,box-shadow .2s;
+  }
+  #yes{
+    background:linear-gradient(135deg,#ff5c8a,#e0245e);color:#fff;
+    box-shadow:0 8px 24px rgba(224,36,94,.45);
+    font-size:1.5rem;padding:1rem 3rem;
+  }
+  #yes:hover{transform:scale(1.1)}
+  #yes:focus-visible,#no:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  #no{background:#fff;color:var(--deep);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+  #no.run{position:fixed;z-index:5;transition:left .25s cubic-bezier(.3,1.6,.5,1),top .25s cubic-bezier(.3,1.6,.5,1)}
+
+  /* poruka nakon "Da" */
+  #win{
+    position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;
+    flex-direction:column;text-align:center;padding:1.5rem;
+    background:radial-gradient(circle,rgba(255,240,245,.55),rgba(255,150,185,.4));
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  }
+  #win.show{display:flex;animation:pop .6s cubic-bezier(.2,1.4,.4,1) both}
+  #win h2{font-family:'Pacifico',cursive;font-weight:400;font-size:clamp(2.4rem,10vw,5.5rem);color:var(--deep);text-shadow:0 4px 0 #fff}
+  #win p{font-size:clamp(1.1rem,3.5vw,1.6rem);margin-top:1rem}
+  #win .big{
+    width:clamp(110px,22vw,190px);height:clamp(110px,22vw,190px);
+    border-radius:50%;object-fit:cover;object-position:center 20%;
+    border:6px solid #fff;box-shadow:0 10px 30px rgba(214,36,110,.4);
+    animation:beat 1.2s infinite;
+  }
+  .confetti{position:fixed;top:-30px;z-index:11;pointer-events:none;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+  /* ne sakrij dugme za izbor slike */
+  #pick{position:fixed;right:10px;bottom:10px;z-index:3;font-size:.8rem;padding:.4rem .8rem;background:rgba(255,255,255,.6);color:var(--deep);box-shadow:none}
+  @media (prefers-reduced-motion:reduce){.bg-heart,.beat{animation:none}}
+</style>
+</head>
+<body>
+<div id="photo"></div>
+<div id="hearts"></div>
+
+<main>
+  <div class="card">
+    <h1>Emma voliss li meeeee? <span class="beat">❤️</span></h1>
+    <div class="btns">
+      <button id="yes">Da</button>
+      <button id="no">Ne</button>
+    </div>
+  </div>
+</main>
+
+<div id="win" aria-live="polite">
+  <img class="big" id="face" alt="">
+  <h2>Znao sam! ❤️</h2>
+  <p>VILKAAAAA MOJA 💖</p>
+</div>
+
+<button id="pick" title="Odaberi sliku za pozadinu (samo za pregled)">📷 Slika</button>
+<input type="file" id="file" accept="image/*" hidden>
+
+<script>
+/* ===== PODEŠAVANJE =====
+   Za trajnu sliku: stavi je u isti folder kao ovaj fajl i upiši ime ovdje
+   (npr. "emma.jpg").
+   Ostavi prazno ako ne želiš sliku. */
+const BACKGROUND_IMAGE = "emma.jpeg";
+const HIDE_PICK_BUTTON = true; // stavi true da sakriješ 📷 dugme prije slanja
+const FACE_IMAGE = "kelicaflow.jpeg";
+const face = document.getElementById('face');
+face.src = FACE_IMAGE || BACKGROUND_IMAGE;
+
+const photo = document.getElementById('photo');
+if (BACKGROUND_IMAGE) photo.style.setProperty('--bg-img', `url("${BACKGROUND_IMAGE}")`);
+const pick = document.getElementById('pick'), file = document.getElementById('file');
+if (HIDE_PICK_BUTTON) pick.style.display = 'none';
+pick.onclick = () => file.click();
+file.onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  photo.style.setProperty('--bg-img', `url("${URL.createObjectURL(f)}")`);
+};
+
+/* srca u pozadini */
+const hearts = document.getElementById('hearts');
+const emojis = ['❤️','💖','💕','💗','💘','🌹'];
+function addHeart(){
+  const h = document.createElement('span');
+  h.className = 'bg-heart';
+  h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  h.style.left = Math.random()*100 + 'vw';
+  h.style.fontSize = (16 + Math.random()*34) + 'px';
+  const d = 7 + Math.random()*8;
+  h.style.animationDuration = d + 's';
+  hearts.appendChild(h);
+  setTimeout(() => h.remove(), d*1000);
+}
+for (let i=0;i<14;i++) setTimeout(addHeart, i*250);
+setInterval(addHeart, 500);
+
+/* dugme Ne */
+const no = document.getElementById('no');
+let mouse = {x:-999,y:-999}, moving = false;
+function runAway(){
+  if (!no.classList.contains('run')){
+    // dugme prebacujemo u <body> jer 'blur' kartica zarobljava fixed pozicioniranje
+    const ph = document.createElement('span');
+    ph.style.width = no.offsetWidth + 'px';
+    no.parentNode.insertBefore(ph, no);
+    const r = no.getBoundingClientRect();
+    no.style.left = r.left + 'px';
+    no.style.top = r.top + 'px';
+    document.body.appendChild(no);
+    no.classList.add('run');
+    void no.offsetWidth;
+  }
+  const m = 10, w = no.offsetWidth, h = no.offsetHeight;
+  const maxX = window.innerWidth - w - m;
+  const maxY = window.innerHeight - h - m;
+  let x, y, tries = 0;
+  do {
+    x = m + Math.random()*Math.max(0, maxX - m);
+    y = m + Math.random()*Math.max(0, maxY - m);
+    tries++;
+  } while (tries < 40 && Math.hypot(x + w/2 - mouse.x, y + h/2 - mouse.y) < 250);
+  no.style.left = x + 'px';
+  no.style.top = y + 'px';
+}
+/* bježi čim se miš samo približi (levo, desno, gore, dole...) */
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX; mouse.y = e.clientY;
+  const r = no.getBoundingClientRect();
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  if (Math.hypot(e.clientX - cx, e.clientY - cy) < Math.max(r.width, r.height) + 50) runAway();
+});
+no.addEventListener('mouseenter', runAway);
+no.addEventListener('pointerdown', e => { e.preventDefault(); runAway(); });
+no.addEventListener('touchstart', e => { e.preventDefault(); runAway(); }, {passive:false});
+no.addEventListener('focus', () => { runAway(); no.blur(); });
+no.addEventListener('click', e => { e.preventDefault(); runAway(); });
+window.addEventListener('resize', () => { if (no.classList.contains('run')) runAway(); });
+
+/* dugme Da */
+document.getElementById('yes').addEventListener('click', () => {
+  document.getElementById('win').classList.add('show');
+  no.style.display = 'none';
+  const colors = ['#ff4d79','#ffd1dc','#ff8fb0','#fff','#ffc233','#d6246e'];
+  const burst = () => {
+    for (let i=0;i<60;i++){
+      const c = document.createElement('span');
+      c.className = 'confetti';
+      if (Math.random() < .45){ c.textContent = ['❤️','💖','💕'][i%3]; c.style.fontSize = (14+Math.random()*20)+'px'; }
+      else { c.style.width = '10px'; c.style.height = '16px'; c.style.background = colors[i%colors.length]; c.style.borderRadius = '2px'; }
+      c.style.left = Math.random()*100 + 'vw';
+      const d = 2.5 + Math.random()*2.5;
+      c.style.animationDuration = d + 's';
+      c.style.animationDelay = Math.random()*.8 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), (d+1)*1000);
+    }
+  };
+  burst();
+  setInterval(burst, 2500);
+});
+</script>
+</body>
+</html>
